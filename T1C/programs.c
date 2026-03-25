@@ -2,9 +2,19 @@
 
 #include <string.h>
 
-// Transposicao direta dos programas de Sistema.java para C
+// -----  P R O G R A M A S   A R M A Z E N A D O S  -----
+// Programas que podem ser carregados em memória e executados
+// Transposição direta dos programas definidos em Sistema.java para C
+// Cada programa é representado como um array estático de Words (instruções)
+// Os programas representam:
+//   - fatorial: calcula fatorial de um número
+//   - fibonnacci10: calcula os primeiros 10 números de Fibonacci
+//   - progMinimo: programa mínimo para teste de memória e dados
 
-// fatorial
+// -----  P R O G R A M A   F A T O R I A L  -----
+// Calcula o fatorial de um número (apenas valores positivos)
+// Entrada: r0 é o valor para calcular fatorial
+// Saída: resultado armazenado em memória[10]
 static const Word prog_fatorial[] = {
     { LDI, 0, -1, 7 },
     { LDI, 1, -1, 1 },
@@ -19,7 +29,11 @@ static const Word prog_fatorial[] = {
     { DATA, -1, -1, -1 }
 };
 
-// fatorialV2
+// -----  P R O G R A M A   F A T O R I A L   V 2  -----
+// Versão 2 do fatorial com tratamento de números negativos
+// Usa SYSCALL para output (escreve o resultado)
+// Entrada: número armazenado em memória[19]
+// Saída: resultado impresso e armazenado em memória[18]
 static const Word prog_fatorialV2[] = {
     { LDI, 0, -1, 5 },
     { STD, 0, -1, 19 },
@@ -43,7 +57,10 @@ static const Word prog_fatorialV2[] = {
     { DATA, -1, -1, -1 }
 };
 
-// progMinimo
+// -----  P R O G R A M A   M Í N I M O  -----
+// Programa mínimo para teste
+// Carrega um valor em r0 e o armazena em várias posições de memória
+// Útil para teste de operações básicas de memória
 static const Word prog_progMinimo[] = {
     { LDI, 0, -1, 999 },
     { STD, 0, -1, 8 },
@@ -61,7 +78,10 @@ static const Word prog_progMinimo[] = {
     { DATA, -1, -1, -1 }
 };
 
-// fibonacci10
+// -----  P R O G R A M A   F I B O N A C C I  1 0  -----
+// Calcula os primeiros 10 números da sequência de Fibonacci
+// Utiliza índices de memória para armazenar a sequência
+// Saída: sequência armazenada em memória[20] até memória[29]
 static const Word prog_fibonacci10[] = {
     { LDI, 1, -1, 0 },
     { STD, 1, -1, 20 },
@@ -269,6 +289,9 @@ static const Word prog_PC[] = {
     { DATA, -1, -1, -1 }
 };
 
+// -----  T A B E L A   D E   P R O G R A M A S  -----
+// Tabela centralizada com todos os programas disponíveis
+// Cada programa é armazenado com seu nome e tamanho
 static const Program program_table[] = {
     { "fatorial",      prog_fatorial,      (int)(sizeof(prog_fatorial)      / sizeof(Word)) },
     { "fatorialV2",    prog_fatorialV2,    (int)(sizeof(prog_fatorialV2)    / sizeof(Word)) },
@@ -280,6 +303,10 @@ static const Program program_table[] = {
     { "PC",            prog_PC,            (int)(sizeof(prog_PC)            / sizeof(Word)) }
 };
 
+// -----  R E C U P E R A Ç Ã O   D E   P R O G R A M A  -----
+// Busca um programa pela sua identificação (nome)
+// Percorre a tabela de programas procurando por um nome que corresponda
+// Retorna: pointer para a estrutura Program se encontrado, NULL caso contrário
 const Program *retrieve_program(const char *name) {
     size_t count = sizeof(program_table) / sizeof(program_table[0]);
     for (size_t i = 0; i < count; ++i) {
