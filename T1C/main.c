@@ -32,7 +32,7 @@ int main(void) {
 
     if (!p) {
         printf("Programa nao encontrado: %s\n", progName);
-        memory_free(&mem);
+        free_program(&mem, p);
         return 1;
     }
 

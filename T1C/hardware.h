@@ -64,12 +64,19 @@ typedef struct {
     int p;
 } Word;
 
+
+typedef struct {
+    Word *pos;
+    size_t pg_size; // Número de palavras por página
+} Page; 
+
 typedef struct {
     Word *pos;
     size_t size;
-    int nro_frames;
+    bool *allocated_frames; // Tabela de alocação de frames (true = ocupado, false = livre)
+    int nro_frames; // Número total de frames na memória, calculado na inicialização
     int free_frames; 
-    bool *allocated_frames; 
+    Page *page_table; // Tabela de páginas para mapeamento de endereços lógicos para físicos
 } Memory;
 
 // Declaracao adiantada
