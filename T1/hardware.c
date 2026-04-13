@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TAM_PG 8
+
 // -----  N O M E   T E X T U A L   D E   O P C O D E  -----
 // Função auxiliar para debug - retorna nome legível do opcode
 const char *opcode_name(Opcode op) {
@@ -69,11 +71,37 @@ static int testOverflow(CPU *cpu, int v) {
 // Cada posição é inicializada com opcode ___ (não usada)
 void memory_init(Memory *mem, size_t size) {
     mem->size = size;
-    mem->pos = (Word *)malloc(size * sizeof(Word));
+
+    // Calcular numero de frames
+    mem->nro_frames = (int)(size / TAM_PG);
+
+    // Inicialmente, todos frames estão livres
+    mem->free_frames = mem->nro_frames;
+
+    // Alocar bitmap dos frames
+    mem->allocated_frames = malloc((size_t)mem->nro_frames * sizeof(bool));
+
+    // Verifica falha de alocação
+    if (!mem->allocated_frames) {
+        fprintf(stderr, "Erro ao alocar bitmap de frames\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Inicializa todo bitmap como livre
+    for (int i = 0; i < mem->nro_frames; ++i) {
+        mem->allocated_frames[i] = false;
+    }
+
+    // Aloca memória principal
+    mem->pos = malloc(size * sizeof(Word));
+
+    // Verifica se a falha na memoria principal
     if (!mem->pos) {
         fprintf(stderr, "Erro ao alocar memoria virtual\n");
         exit(EXIT_FAILURE);
     }
+
+    // Inicializa cada posição com ___ e -1
     for (size_t i = 0; i < size; ++i) {
         mem->pos[i].opc = ___;
         mem->pos[i].ra = -1;
@@ -84,9 +112,20 @@ void memory_init(Memory *mem, size_t size) {
 
 // Libera a memória previamente alocada
 void memory_free(Memory *mem) {
+    if (!mem) return;
+
+    // Libera bitmap de frames
+    free(mem->allocated_frames);
+    mem->allocated_frames = NULL;
+
+    // Libera memória principal
     free(mem->pos);
     mem->pos = NULL;
+
+    // Reseta metadados
     mem->size = 0;
+    mem->nro_frames = 0;
+    mem->free_frames = 0;
 }
 
 // -----  C P U  -----
