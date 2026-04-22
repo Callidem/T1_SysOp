@@ -14,14 +14,14 @@
 #include "so.h"
 #include "programs.h"
 #include "utils.h"
+#include "mem_mngr.h"
 
 int main(void) {
-    Memory mem;
     CPU cpu;
-
+    Mem_Mngr gm;
     // -----  I N I C I A L I Z A Ç Ã O   D O   S I S T E M A  -----
-    memory_init(&mem, 1024);      // Cria memória com 1024 palavras
-    cpu_init(&cpu, &mem, 1);      // Cria CPU com debug ligado (1)
+    gm_init(&gm, 1024, 16);       // Inicializa gerenciador de memória (tamanho total e tamanho de página)
+    cpu_init(&cpu, &gm.mem, 1);      // Cria CPU com debug ligado (1)
 
     // Registra as funções de tratamento de interrupções e syscalls do SO
     cpu_set_handlers(&cpu, so_interrupt_handle, so_syscall_handle, so_syscall_stop);
@@ -32,13 +32,13 @@ int main(void) {
 
     if (!p) {
         printf("Programa nao encontrado: %s\n", progName);
-        free_program(&mem, p);
+        memory_free(&gm.mem);
         return 1;
     }
 
     printf("Executando programa: %s\n", p->name);
-    utils_load_and_exec(&cpu, &mem, p->image, p->size);  // Carrega programa e executa
+    utils_load_and_exec(&cpu, &gm.mem, p->image, p->size);  // Carrega programa e executa
 
-    memory_free(&mem);
+    memory_free(&gm.mem);
     return 0;
 }
